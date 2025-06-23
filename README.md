@@ -51,3 +51,26 @@ index=main sourcetype=linux_secure "Failed password"
 | rex field=_raw "from\s(?<src_ip>\d+\.\d+\.\d+\.\d+)"
 | stats sum(repeat_count) as total_failed_attempts by src_ip
 | sort -total_failed_attempts
+
+### **2. Successful Logins by User and IP**
+
+index=main sourcetype=linux_secure "Accepted password"
+| rex field=_raw "for\s(?<user>\w+)\sfrom\s(?<src_ip>\d+\.\d+\.\d+\.\d+)"
+| stats count by user, src_ip
+| sort -count
+
+### **3.Failed Logins Over Time**
+index=main sourcetype=linux_secure "Failed password"
+| rex field=_raw "message repeated (?<repeat_count>\d+) times"
+| eval repeat_count = if(isnull(repeat_count), 1, tonumber(repeat_count))
+| timechart span=1h sum(repeat_count) as failed_logins
+
+### **4. Brute Force Detection (5+ in 5 min)**
+index=main sourcetype=linux_secure "Failed password"
+| rex field=_raw "message repeated (?<repeat_count>\d+) times"
+| eval repeat_count = if(isnull(repeat_count), 1, tonumber(repeat_count))
+| rex field=_raw "from\s(?<src_ip>\d+\.\d+\.\d+\.\d+)"
+| bucket _time span=5m
+| stats sum(repeat_count) as failed_attempts by src_ip, _time
+| where failed_attempts > 5
+| sort -_time
