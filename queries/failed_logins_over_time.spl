@@ -1,0 +1,7 @@
+# Failed Logins Over Time (Line Chart)
+# Shows total failed login attempts per hour.
+
+index=main sourcetype=linux_secure "Failed password"
+| rex field=_raw "message repeated (?<repeat_count>\d+) times"
+| eval repeat_count = if(isnull(repeat_count), 1, tonumber(repeat_count))
+| timechart span=1h sum(repeat_count) as failed_logins
