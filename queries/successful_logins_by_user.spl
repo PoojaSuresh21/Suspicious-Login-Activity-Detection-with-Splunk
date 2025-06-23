@@ -1,0 +1,7 @@
+# Successful Logins by User and IP Address
+# Extracts usernames and IPs from successful SSH logins.
+
+index=main sourcetype=linux_secure "Accepted password"
+| rex field=_raw "for\s(?<user>\w+)\sfrom\s(?<src_ip>\d+\.\d+\.\d+\.\d+)"
+| stats count by user, src_ip
+| sort -count
