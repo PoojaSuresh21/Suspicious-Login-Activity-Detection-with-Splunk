@@ -1,0 +1,9 @@
+# Failed Login Attempts by IP Address
+# This query extracts IP addresses from failed login attempts and counts how many times each one failed.
+
+index=main sourcetype=linux_secure "Failed password"
+| rex field=_raw "message repeated (?<repeat_count>\d+) times"
+| eval repeat_count = if(isnull(repeat_count), 1, tonumber(repeat_count))
+| rex field=_raw "from\s(?<src_ip>\d+\.\d+\.\d+\.\d+)"
+| stats sum(repeat_count) as total_failed_attempts by src_ip
+| sort -total_failed_attempts
