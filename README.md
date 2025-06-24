@@ -32,13 +32,6 @@ This project detects and visualizes SSH login activity from Linux `auth.log` usi
    - Brute-force patterns
 4. Created a dashboard with 4 key panels
 
----
-
-## Dashboard Screenshots
-
-> *(Upload screenshots here once you take them from your Splunk dashboard)*
-
----
 
 ## Key SPL Queries
 
